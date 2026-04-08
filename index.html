@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Refund Request — LatePoint</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f4f6f9;
+      color: #1a1d23;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 16px 80px;
+    }
+
+    /* ── Logo / Brand bar ── */
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 36px;
+    }
+    .brand-logo {
+      width: 36px; height: 36px;
+      background: #4f46e5;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .brand-logo svg { width: 20px; height: 20px; fill: #fff; }
+    .brand-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a1d23;
+      letter-spacing: -0.3px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.07);
+      width: 100%;
+      max-width: 620px;
+      overflow: hidden;
+    }
+
+    /* ── Card header ── */
+    .card-header {
+      padding: 36px 40px 28px;
+      border-bottom: 1px solid #f0f1f3;
+    }
+    .card-header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1a1d23;
+      letter-spacing: -0.4px;
+      margin-bottom: 10px;
+    }
+    .card-header p {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #5c6370;
+    }
+
+    /* ── Progress bar ── */
+    .progress-wrap {
+      padding: 0 40px;
+      margin-top: 24px;
+      display: flex;
+      gap: 6px;
+    }
+    .progress-step {
+      flex: 1;
+      height: 4px;
+      background: #e8eaed;
+      border-radius: 99px;
+      transition: background .3s;
+    }
+    .progress-step.active { background: #4f46e5; }
+    .progress-step.done   { background: #a5b4fc; }
+
+    /* ── Form body ── */
+    .card-body {
+      padding: 32px 40px 36px;
+    }
+
+    /* Step panels */
+    .step { display: none; }
+    .step.active { display: block; }
+
+    .step-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: #a0a8b4;
+      margin-bottom: 20px;
+    }
+
+    /* ── Field groups ── */
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .field { margin-bottom: 20px; }
+    .field:last-child { margin-bottom: 0; }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+    label .opt {
+      font-weight: 400;
+      color: #a0a8b4;
+      font-size: 12px;
+      margin-left: 4px;
+    }
+    label .req { color: #e04f4f; margin-left: 2px; }
+
+    input[type="text"],
+    input[type="email"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-family: inherit;
+      color: #1a1d23;
+      background: #fff;
+      border: 1.5px solid #d1d5db;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+    }
+    input.pre-filled {
+      background: #f8f7ff;
+      border-color: #c4b5fd;
+      color: #5b4fe5;
+    }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+    textarea { resize: vertical; min-height: 100px; line-height: 1.55; }
+
+    /* Pre-fill badge */
+    .prefill-note {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11.5px;
+      color: #7c3aed;
+      background: #f5f3ff;
+      border: 1px solid #ddd6fe;
+      border-radius: 6px;
+      padding: 4px 8px;
+      margin-top: 5px;
+    }
+    .prefill-note svg { width: 12px; height: 12px; fill: #7c3aed; flex-shrink: 0; }
+
+    /* ── Conditional reveal ── */
+    .conditional {
+      display: none;
+      margin-top: 16px;
+      padding: 16px;
+      background: #f8f9fb;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 10px;
+    }
+    .conditional.visible { display: block; }
+    .conditional label { color: #4b5563; }
+
+    /* ── Radio / Checkbox groups ── */
+    .radio-group, .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .radio-option, .checkbox-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 11px 14px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+    }
+    .radio-option:hover, .checkbox-option:hover {
+      border-color: #a5b4fc;
+      background: #fafafe;
+    }
+    .radio-option input, .checkbox-option input { margin-top: 2px; accent-color: #4f46e5; }
+    .radio-option.selected, .checkbox-option.selected {
+      border-color: #4f46e5;
+      background: #f5f3ff;
+    }
+    .radio-option .option-text, .checkbox-option .option-text {
+      font-size: 14px;
+      color: #374151;
+      line-height: 1.4;
+    }
+    .radio-option .option-sub {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 2px;
+    }
+
+    /* ── Star rating ── */
+    .star-rating {
+      display: flex;
+      gap: 6px;
+      margin-top: 2px;
+    }
+    .star {
+      font-size: 28px;
+      color: #d1d5db;
+      cursor: pointer;
+      transition: color .15s, transform .15s;
+      line-height: 1;
+      user-select: none;
+    }
+    .star.lit { color: #f59e0b; }
+    .star.selected { color: #f59e0b; transform: scale(1.1); }
+
+    /* ── Divider ── */
+    .divider {
+      height: 1px;
+      background: #f0f1f3;
+      margin: 24px 0;
+    }
+
+    /* ── Info banner ── */
+    .info-banner {
+      display: flex;
+      gap: 10px;
+      padding: 12px 14px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 9px;
+      margin-bottom: 22px;
+      font-size: 13px;
+      color: #1e40af;
+      line-height: 1.5;
+    }
+    .info-banner svg { width: 16px; height: 16px; fill: #3b82f6; flex-shrink: 0; margin-top: 1px; }
+    /* Prevent banner's margin bleeding inside conditional panels */
+    .conditional .info-banner { margin-bottom: 0; }
+
+    /* ── Navigation ── */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 28px;
+      gap: 12px;
+    }
+    .btn {
+      padding: 11px 24px;
+      border-radius: 9px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      border: none;
+      font-family: inherit;
+    }
+    .btn-primary {
+      background: #4f46e5;
+      color: #fff;
+      flex: 1;
+    }
+    .btn-primary:hover { background: #4338ca; }
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #4b5563;
+      min-width: 90px;
+    }
+    .btn-secondary:hover { background: #e5e7eb; }
+    .btn-danger {
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1.5px solid #fca5a5;
+    }
+    .btn-danger:hover { background: #fee2e2; }
+
+    /* ── Success screen ── */
+    .success-screen {
+      display: none;
+      text-align: center;
+      padding: 48px 40px 40px;
+    }
+    .success-screen.active { display: block; }
+    .success-icon {
+      width: 64px; height: 64px;
+      background: #dcfce7;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .success-icon svg { width: 28px; height: 28px; fill: #16a34a; }
+    .retention-icon {
+      width: 64px; height: 64px;
+      background: #fef3c7;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .retention-icon svg { width: 28px; height: 28px; fill: #d97706; }
+    .offer-pill {
+      display: inline-block;
+      background: #fef3c7;
+      border: 1.5px solid #fde68a;
+      color: #92400e;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 99px;
+      padding: 5px 14px;
+      margin: 8px 0 20px;
+    }
+    .fallback-note {
+      font-size: 12.5px;
+      color: #9ca3af;
+      text-align: center;
+      margin-top: 16px;
+      line-height: 1.6;
+    }
+    .success-screen h2 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      margin-bottom: 10px;
+    }
+    .success-screen p {
+      font-size: 14.5px;
+      color: #5c6370;
+      line-height: 1.65;
+      margin-bottom: 28px;
+    }
+    .timeline-card {
+      background: #f8f9fb;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 18px 20px;
+      text-align: left;
+      margin-bottom: 20px;
+    }
+    .timeline-card h3 {
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 10px;
+    }
+    .timeline-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13.5px;
+      color: #4b5563;
+      margin-bottom: 8px;
+    }
+    .timeline-item:last-child { margin-bottom: 0; }
+    .timeline-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #4f46e5;
+      flex-shrink: 0;
+    }
+    .reconsider-banner {
+      background: #fffbeb;
+      border: 1.5px solid #fde68a;
+      border-radius: 10px;
+      padding: 16px 20px;
+      text-align: left;
+    }
+    .reconsider-banner p {
+      font-size: 13.5px;
+      color: #92400e;
+      margin-bottom: 12px;
+    }
+    .reconsider-banner .btn { width: 100%; margin-bottom: 8px; }
+
+    /* ── Plan tier — compact 3-column grid ── */
+    .plan-tier-group {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .plan-tier-group .radio-option {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 12px 8px;
+    }
+    .plan-tier-group .radio-option input { margin: 0 0 6px; }
+    @media (max-width: 520px) {
+      .plan-tier-group { grid-template-columns: 1fr; }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 520px) {
+      .card-header, .card-body, .success-screen { padding-left: 24px; padding-right: 24px; }
+      .progress-wrap { padding-left: 24px; padding-right: 24px; }
+      .field-row { grid-template-columns: 1fr; }
+      .nps-scale { display: flex; flex-wrap: wrap; }
+      .nps-btn { flex: 1 1 calc(100% / 6 - 4px); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Brand -->
+  <div class="brand">
+    <div class="brand-logo">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+    </div>
+    <span class="brand-name">LatePoint</span>
+  </div>
+
+  <!-- Main card -->
+  <div class="card" id="mainCard">
+
+    <!-- Header -->
+    <div class="card-header">
+      <h1>We're here to help</h1>
+      <p>We'd love to understand your experience so we can improve and serve you better. Your feedback takes under 2 minutes and directly shapes what we build next.</p>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-wrap" id="progressBar">
+      <div class="progress-step active" id="prog0"></div>
+      <div class="progress-step" id="prog1"></div>
+    </div>
+
+    <div class="card-body">
+      <div class="step active" id="step0">
+        <div class="step-label">Step 1 of 2 — Your Details</div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="firstName">First Name <span class="req">*</span></label>
+            <input type="text" id="firstName" placeholder="Jane" required />
+          </div>
+          <div class="field">
+            <label for="lastName">Last Name <span class="req">*</span></label>
+            <input type="text" id="lastName" placeholder="Smith" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="email">Email Address <span class="req">*</span></label>
+          <input type="email" id="email" class="pre-filled" value="jane.smith@example.com" readonly />
+          <span class="prefill-note">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+            Auto-filled from your account
+          </span>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="field">
+          <label>How did you purchase LatePoint? <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-option" onclick="selectRadio(this,'billingType','annual')">
+              <input type="radio" name="billingType" value="annual" />
+              <div>
+                <div class="option-text">Annual License</div>
+                <div class="option-sub">Billed every year — Starter $79 · Scale $149 · Agency $299</div>
+              </div>
+            </label>
+            <label class="radio-option" onclick="selectRadio(this,'billingType','lifetime')">
+              <input type="radio" name="billingType" value="lifetime" />
+              <div>
+                <div class="option-text">Lifetime License (one-time)</div>
+                <div class="option-sub">Single payment, no renewals — Starter $199 · Scale $399 · Agency $599</div>
+              </div>
+            </label>
+            <label class="radio-option" onclick="selectRadio(this,'billingType','split_pay')">
+              <input type="radio" name="billingType" value="split_pay" />
+              <div>
+                <div class="option-text">Split-pay (Monthly Installments)</div>
+                <div class="option-sub">Lifetime license paid over 11 months — $19.99 · $39.99 · $59.99/mo</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Which plan tier? <span class="req">*</span></label>
+          <div class="radio-group plan-tier-group">
+            <label class="radio-option" onclick="selectRadio(this,'planTier','starter')">
+              <input type="radio" name="planTier" value="starter" />
+              <div>
+                <div class="option-text">Starter</div>
+                <div class="option-sub">1 site</div>
+              </div>
+            </label>
+            <label class="radio-option" onclick="selectRadio(this,'planTier','scale')">
+              <input type="radio" name="planTier" value="scale" />
+              <div>
+                <div class="option-text">Scale</div>
+                <div class="option-sub">5 sites</div>
+              </div>
+            </label>
+            <label class="radio-option" onclick="selectRadio(this,'planTier','agency')">
+              <input type="radio" name="planTier" value="agency" />
+              <div>
+                <div class="option-text">Agency</div>
+                <div class="option-sub">100 sites</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="field">
+          <label>Did you reach out to our support team before deciding to request a refund? <span class="req">*</span></label>
+          <div class="radio-group" id="supportGroup">
+            <label class="radio-option" onclick="selectRadio(this, 'support', 'yes')">
+              <input type="radio" name="support" value="yes" />
+              <div>
+                <div class="option-text">Yes, I contacted support</div>
+                <div class="option-sub">I reached out but the issue wasn't resolved</div>
+              </div>
+            </label>
+            <label class="radio-option" onclick="selectRadio(this, 'support', 'no')">
+              <input type="radio" name="support" value="no" />
+              <div>
+                <div class="option-text">No, I didn't reach out</div>
+                <div class="option-sub">I'd prefer to proceed with the refund directly</div>
+              </div>
+            </label>
+          </div>
+
+          <div class="conditional" id="support_no_nudge">
+            <div class="info-banner">
+              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+              Many issues can be resolved in under 10 minutes. Our support team is available 24/7 — would you like to try before requesting a refund? <a href="https://latepoint.com/support" target="_blank" style="color:#1e40af;font-weight:600;">Contact Support →</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav">
+          <button class="btn btn-primary" onclick="nextStep(0)">Continue →</button>
+        </div>
+      </div>
+
+      <div class="step" id="step1">
+        <div class="step-label">Step 2 of 2 — Your Experience</div>
+
+        <div class="field">
+          <label for="primaryReason">Primary Reason for Refund <span class="req">*</span></label>
+          <select id="primaryReason" onchange="handleReasonChange()">
+            <option value="">Select a reason…</option>
+            <option value="expected_more">I expected more from the product</option>
+            <option value="difficult_to_use">It's difficult to use</option>
+            <option value="didnt_work">It didn't work as advertised</option>
+            <option value="too_expensive">It's too expensive</option>
+            <option value="poor_support">I had a poor customer support experience</option>
+            <option value="missing_feature">Missing a key feature I needed</option>
+          </select>
+        </div>
+
+        <div class="conditional" id="cond_difficult_to_use">
+          <label>Which part was difficult? <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-option" onclick="selectRadio(this, 'difficult_part', 'setup')">
+              <input type="radio" name="difficult_part" value="setup" />
+              <div class="option-text">Initial setup &amp; installation</div>
+            </label>
+            <label class="radio-option" onclick="selectRadio(this, 'difficult_part', 'navigation')">
+              <input type="radio" name="difficult_part" value="navigation" />
+              <div class="option-text">Navigation &amp; finding features</div>
+            </label>
+            <label class="radio-option" onclick="selectRadio(this, 'difficult_part', 'feature_discovery')">
+              <input type="radio" name="difficult_part" value="feature_discovery" />
+              <div class="option-text">Understanding what features exist</div>
+            </label>
+            <label class="radio-option" onclick="selectRadio(this, 'difficult_part', 'documentation')">
+              <input type="radio" name="difficult_part" value="documentation" />
+              <div class="option-text">Lack of clear documentation</div>
+            </label>
+          </div>
+        </div>
+
+        <div class="conditional" id="cond_too_expensive">
+          <label>What describes your pricing concern best?</label>
+          <div id="priceOptions" style="display:flex;flex-direction:column;gap:8px;margin-top:4px"></div>
+          <div id="lifetimeNudge" style="display:none;margin-top:14px">
+            <div class="info-banner">
+              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+              <span id="lifetimeNudgeText"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="conditional" id="cond_didnt_work">
+          <label>Which feature didn't meet expectations? <span class="req">*</span></label>
+          <input type="text" id="featureExpectation" placeholder="e.g., calendar sync, payment processing…" />
+        </div>
+
+        <div class="conditional" id="cond_missing_feature">
+          <label>What feature were you looking for?</label>
+          <input type="text" id="missingFeature" placeholder="Describe the feature you needed…" />
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="field">
+          <label>Would you consider staying with LatePoint? <span class="req">*</span></label>
+          <div class="radio-group" id="stayGroup">
+            <label class="radio-option" onclick="selectRadio(this, 'stay', 'yes'); showStayConditional('yes')">
+              <input type="radio" name="stay" value="yes" />
+              <div>
+                <div class="option-text">Yes, I'd consider it</div>
+                <div class="option-sub">With the right offer or solution</div>
+              </div>
+            </label>
+            <label class="radio-option" onclick="selectRadio(this, 'stay', 'no'); showStayConditional('no')">
+              <input type="radio" name="stay" value="no" />
+              <div>
+                <div class="option-text">No, I've made up my mind</div>
+                <div class="option-sub">Please proceed with my refund</div>
+              </div>
+            </label>
+          </div>
+
+          <div class="conditional" id="stay_yes">
+            <div id="impliedSolutionWrap" style="display:none">
+              <div class="info-banner">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                <span id="impliedSolutionText"></span>
+              </div>
+            </div>
+            <div id="stayOptionsWrap">
+              <label>What would make you stay?</label>
+              <div id="stayOptions" style="display:flex;flex-direction:column;gap:8px;margin-top:4px"></div>
+            </div>
+            <div class="info-banner" id="stayFollowUpBanner" style="margin-top:14px">
+              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+              We'll follow up with a personalised offer based on your selection.
+            </div>
+          </div>
+
+          <div class="conditional" id="stay_no"></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="field">
+          <label>How would you rate your overall satisfaction? <span class="req">*</span></label>
+          <div class="star-rating" id="starRating">
+            <span class="star" data-value="1">★</span>
+            <span class="star" data-value="2">★</span>
+            <span class="star" data-value="3">★</span>
+            <span class="star" data-value="4">★</span>
+            <span class="star" data-value="5">★</span>
+            <input type="hidden" id="ratingValue" value="" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="improve">How could we improve? <span class="opt">(optional — but highly valued)</span></label>
+          <textarea id="improve" placeholder="Share anything — features, onboarding, pricing, support…" style="min-height:88px"></textarea>
+        </div>
+
+        <div class="nav">
+          <button class="btn btn-secondary" onclick="prevStep(1)">← Back</button>
+          <button class="btn btn-danger" onclick="submitForm()">Submit Refund Request</button>
+        </div>
+      </div>
+
+    </div><!-- /card-body -->
+
+    <div class="success-screen" id="successScreen">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+      </div>
+      <h2>Request Received</h2>
+      <p>Thank you for sharing your experience. Your refund request has been submitted — here's what happens next.</p>
+
+      <div class="timeline-card">
+        <h3>Refund Timeline</h3>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          Request received &amp; queued for review (today)
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background:#a5b4fc"></div>
+          Review completed within 1–2 business days
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background:#d1d5db"></div>
+          Refund issued to your original payment method (3–7 days)
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background:#d1d5db"></div>
+          <span>Confirmation email sent to <strong id="confirmEmail">your email</strong></span>
+        </div>
+      </div>
+
+      <div class="reconsider-banner">
+        <p>Changed your mind? We can cancel this refund request and keep your license active — no action needed on your end.</p>
+        <button class="btn btn-secondary" onclick="alert('Your refund request has been cancelled. Your license remains active.')">Keep my license active</button>
+        <div style="font-size:12px;color:#b45309;text-align:center">We'll cancel the refund request and your access will continue as normal.</div>
+      </div>
+    </div>
+
+    <div class="success-screen" id="retentionScreen">
+      <div class="retention-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/></svg>
+      </div>
+      <h2>We'd love to keep you</h2>
+      <p>Your refund request is on hold while we work on a solution for you.</p>
+      <div class="offer-pill" id="retentionOfferPill"></div>
+
+      <div class="timeline-card">
+        <h3>What happens next</h3>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          Request received &amp; flagged for our account team (today)
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background:#fbbf24"></div>
+          Our team will get in touch shortly
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background:#d1d5db"></div>
+          <span>Confirmation email sent to <strong id="retentionEmail">your email</strong></span>
+        </div>
+      </div>
+
+      <div class="fallback-note">
+        Not interested in our offer? Just reply to our email and we'll process your refund right away.
+      </div>
+    </div>
+
+  </div><!-- /card -->
+
+  <script>
+    let currentStep = 0;
+    const totalSteps = 2;
+
+    const stars = document.querySelectorAll('.star');
+    function updateStars(hoverVal, selectedVal) {
+      stars.forEach(s => {
+        const v = parseInt(s.dataset.value);
+        s.classList.toggle('lit',      hoverVal   ? v <= hoverVal   : v <= selectedVal);
+        s.classList.toggle('selected', !hoverVal  && v === selectedVal);
+      });
+    }
+    stars.forEach(star => {
+      const v = parseInt(star.dataset.value);
+      star.addEventListener('mouseenter', () => {
+        updateStars(v, parseInt(document.getElementById('ratingValue').value) || 0);
+      });
+      star.addEventListener('mouseleave', () => {
+        updateStars(0, parseInt(document.getElementById('ratingValue').value) || 0);
+      });
+      star.addEventListener('click', () => {
+        document.getElementById('ratingValue').value = v;
+        updateStars(0, v);
+      });
+    });
+
+    function selectRadio(el, name, value) {
+      document.querySelectorAll(`[name="${name}"]`).forEach(r => {
+        const opt = r.closest('.radio-option');
+        if (opt) opt.classList.remove('selected');
+      });
+      el.classList.add('selected');
+      if (name === 'support') {
+        document.getElementById('support_no_nudge').classList.toggle('visible', value === 'no');
+      }
+      if (name === 'price_bracket') {
+        document.getElementById('lifetimeNudge').style.display =
+          value === 'lifetime_unaware' ? 'block' : 'none';
+      }
+    }
+
+    function toggleCheckbox(el) {
+      const cb = el.querySelector('input[type="checkbox"]');
+      setTimeout(() => { el.classList.toggle('selected', cb.checked); }, 0);
+    }
+
+    function getPlanContext() {
+      const billing = document.querySelector('input[name="billingType"]:checked');
+      const tier    = document.querySelector('input[name="planTier"]:checked');
+      return {
+        billingType: billing ? billing.value : null,
+        planTier:    tier    ? tier.value    : null,
+      };
+    }
+
+    function renderPriceOptions() {
+      const { billingType, planTier } = getPlanContext();
+      const wrap = document.getElementById('priceOptions');
+      const options = [];
+      if (billingType === 'annual') {
+        options.push({ value: 'renewal_too_high',   label: 'The annual renewal fee is too high for my budget' });
+        options.push({ value: 'unaware_lifetime',   label: "I wasn't aware of a lifetime deal — one-time payment, no renewals", nudge: true });
+        options.push({ value: 'prefer_installments',label: "I'd prefer to pay in monthly instalments instead of annually" });
+      } else if (billingType === 'lifetime') {
+        options.push({ value: 'upfront_too_high',   label: 'The upfront cost was too high' });
+        options.push({ value: 'unaware_splitpay',   label: "I wasn't aware of the split-pay option (11 monthly instalments)", nudge: true });
+      } else if (billingType === 'split_pay') {
+        options.push({ value: 'monthly_too_high',   label: 'The monthly instalment amount is too high' });
+        options.push({ value: 'total_too_high',     label: 'The total cost across all instalments is too high' });
+      } else {
+        options.push({ value: 'cost_too_high',      label: 'The overall cost is too high for my budget' });
+        options.push({ value: 'prefer_cheaper',     label: 'I found a cheaper alternative' });
+      }
+      if (planTier && planTier !== 'starter') {
+        options.push({ value: 'wrong_tier', label: "I'm on a higher tier than I actually need" });
+      }
+      options.push({ value: 'price_fine_need_more', label: 'The price is fine — I just expected more value for it' });
+      wrap.innerHTML = options.map(o => `
+        <label class="radio-option" onclick="selectRadio(this,'price_bracket','${o.value}')${o.nudge ? "; showPriceNudge('" + o.value + "')" : '; hidePriceNudge()'}">
+          <input type="radio" name="price_bracket" value="${o.value}" />
+          <div class="option-text">${o.label}</div>
+        </label>`).join('');
+    }
+
+    function showPriceNudge(optionValue) {
+      const { billingType, planTier } = getPlanContext();
+      const tierPrices = { starter: { annual: '$79/yr', lifetime: '$199', split_pay: '$19.99x11' },
+                           scale:   { annual: '$149/yr', lifetime: '$399', split_pay: '$39.99x11' },
+                           agency:  { annual: '$299/yr', lifetime: '$599', split_pay: '$59.99x11' } };
+      let msg = '';
+      if (optionValue === 'unaware_lifetime' && planTier) {
+        const price = tierPrices[planTier]?.lifetime || '$199–$599';
+        msg = `The ${planTier.charAt(0).toUpperCase()+planTier.slice(1)} lifetime plan is <strong>${price} one-time</strong> — no annual renewals, ever. We can apply your existing payment toward it. Our team will reach out after you submit.`;
+      } else if (optionValue === 'unaware_splitpay' && planTier) {
+        const price = tierPrices[planTier]?.split_pay || '$19.99–$59.99';
+        msg = `The ${planTier.charAt(0).toUpperCase()+planTier.slice(1)} lifetime plan can be split into <strong>11 monthly payments of ${price}</strong>. We can switch your payment method. Our team will reach out after you submit.`;
+      }
+      if (msg) {
+        document.getElementById('lifetimeNudgeText').innerHTML = msg;
+        document.getElementById('lifetimeNudge').style.display = 'block';
+      }
+    }
+
+    function hidePriceNudge() {
+      document.getElementById('lifetimeNudge').style.display = 'none';
+    }
+
+    function handleReasonChange() {
+      const val = document.getElementById('primaryReason').value;
+      const conditionals = ['difficult_to_use', 'too_expensive', 'didnt_work', 'missing_feature'];
+      conditionals.forEach(k => {
+        const el = document.getElementById('cond_' + k);
+        if (el) el.classList.toggle('visible', val === k);
+      });
+      if (val === 'too_expensive') renderPriceOptions();
+      if (val !== 'difficult_to_use') {
+        document.querySelectorAll('[name="difficult_part"]').forEach(r => {
+          r.checked = false;
+          r.closest('.radio-option').classList.remove('selected');
+        });
+      }
+      if (val !== 'too_expensive') {
+        document.getElementById('lifetimeNudge').style.display = 'none';
+      }
+      if (document.querySelector('input[name="stay"][value="yes"]:checked')) {
+        renderStayOptions();
+      }
+    }
+
+    const stayOptionsByReason = {
+      difficult_to_use: [
+        { value: 'onboarding_help',  label: 'One-on-one setup or onboarding session' },
+        { value: 'better_docs',      label: 'A walkthrough of the feature I was struggling with' },
+        { value: 'extended_trial',   label: 'More time to get familiar with the product' },
+      ],
+      didnt_work: [
+        { value: 'bug_fix',          label: 'A fix or workaround for the specific issue I hit' },
+        { value: 'dedicated_support',label: 'Direct support from the technical team' },
+        { value: 'extended_trial',   label: 'More time to re-test once the issue is resolved' },
+      ],
+      missing_feature: [
+        { value: 'feature_roadmap',  label: 'Knowing this feature is on the roadmap (with a timeline)' },
+        { value: 'workaround',       label: 'A workaround or integration that achieves what I need' },
+        { value: 'extended_trial',   label: 'More time to evaluate once the feature ships' },
+      ],
+      poor_support: [
+        { value: 'escalation',       label: 'My issue escalated and resolved by a senior team member' },
+        { value: 'dedicated_support',label: 'A dedicated support contact for my account' },
+        { value: 'discount',         label: 'A goodwill discount for the experience' },
+      ],
+      expected_more: [
+        { value: 'demo_call',        label: 'A personalised demo to show what the product can do' },
+        { value: 'extended_trial',   label: 'More time to explore features I may have missed' },
+        { value: 'discount',         label: 'A discount to make the value feel more balanced' },
+      ],
+      _default: [
+        { value: 'discount',         label: 'A discount on my current plan' },
+        { value: 'extended_trial',   label: 'Extended time to explore the product' },
+        { value: 'feature_access',   label: 'Access to a specific feature' },
+        { value: 'dedicated_support',label: 'One-on-one setup or onboarding help' },
+      ],
+    };
+
+    function getStayOptionsForTooExpensive() {
+      const { billingType, planTier } = getPlanContext();
+      const downgradeTo = { scale: 'Starter ($79/yr annual · $199 lifetime)', agency: 'Scale ($149/yr annual · $399 lifetime)' };
+      const options = [];
+      if (billingType === 'annual') {
+        options.push({ value: 'discount',          label: 'A discount on my annual renewal' });
+        options.push({ value: 'switch_lifetime',   label: 'Switch to a lifetime license — no more renewals' });
+        options.push({ value: 'switch_split_pay',  label: 'Switch to split-pay — spread the lifetime cost over 11 months' });
+      } else if (billingType === 'lifetime') {
+        options.push({ value: 'partial_credit',    label: 'A partial credit or goodwill discount on my purchase' });
+      } else if (billingType === 'split_pay') {
+        options.push({ value: 'switch_annual',     label: 'Switch to annual billing — often cheaper than total split-pay cost' });
+        options.push({ value: 'payoff_discount',   label: 'Pay off my remaining balance now at a small discount' });
+      } else {
+        options.push({ value: 'discount',          label: 'A discount on my plan' });
+      }
+      if (planTier && planTier !== 'starter') {
+        options.push({ value: 'downgrade', label: `Downgrade to ${downgradeTo[planTier] || 'a lower tier'}` });
+      }
+      options.push({ value: 'price_fine_need_more', label: 'The price is actually fine — I just expected more value' });
+      return options;
+    }
+
+    const impliedSolutionMessages = {
+      unaware_lifetime:    "We'll reach out with details on switching to a lifetime license — one-time payment, no renewals.",
+      unaware_splitpay:    "We'll reach out with details on our split-pay option — spread the cost over 11 monthly instalments.",
+      prefer_installments: "We'll reach out with details on our split-pay option — spread the lifetime cost over 11 monthly instalments.",
+      wrong_tier:          "We'll reach out about downgrade options that better fit your needs.",
+    };
+
+    function renderStayOptions() {
+      const reason       = document.getElementById('primaryReason').value;
+      const priceConcern = document.querySelector('input[name="price_bracket"]:checked')?.value;
+      const impliedWrap    = document.getElementById('impliedSolutionWrap');
+      const optionsWrap    = document.getElementById('stayOptionsWrap');
+      const followUpBanner = document.getElementById('stayFollowUpBanner');
+      if (reason === 'too_expensive' && impliedSolutionMessages[priceConcern]) {
+        document.getElementById('impliedSolutionText').textContent = impliedSolutionMessages[priceConcern];
+        impliedWrap.style.display    = 'block';
+        optionsWrap.style.display    = 'none';
+        followUpBanner.style.display = 'none';
+        return;
+      }
+      impliedWrap.style.display    = 'none';
+      optionsWrap.style.display    = 'block';
+      followUpBanner.style.display = 'flex';
+      const options = reason === 'too_expensive'
+        ? getStayOptionsForTooExpensive()
+        : (stayOptionsByReason[reason] || stayOptionsByReason['_default']);
+      document.getElementById('stayOptions').innerHTML = options.map(o => `
+        <label class="radio-option" onclick="selectRadio(this,'stay_reason','${o.value}')">
+          <input type="radio" name="stay_reason" value="${o.value}" />
+          <div class="option-text">${o.label}</div>
+        </label>`).join('');
+    }
+
+    function showStayConditional(val) {
+      if (val === 'yes') renderStayOptions();
+      document.getElementById('stay_yes').classList.toggle('visible', val === 'yes');
+    }
+
+    function updateProgress(step) {
+      for (let i = 0; i < totalSteps; i++) {
+        const el = document.getElementById('prog' + i);
+        if (i < step)        el.className = 'progress-step done';
+        else if (i === step) el.className = 'progress-step active';
+        else                 el.className = 'progress-step';
+      }
+    }
+
+    function nextStep(from) {
+      if (!validateStep(from)) return;
+      document.getElementById('step' + from).classList.remove('active');
+      currentStep = from + 1;
+      document.getElementById('step' + currentStep).classList.add('active');
+      updateProgress(currentStep);
+      if (from === 0 && document.getElementById('primaryReason').value === 'too_expensive') {
+        renderPriceOptions();
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function prevStep(from) {
+      document.getElementById('step' + from).classList.remove('active');
+      currentStep = from - 1;
+      document.getElementById('step' + currentStep).classList.add('active');
+      updateProgress(currentStep);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function validateStep(step) {
+      if (step === 0) {
+        const fn      = document.getElementById('firstName').value.trim();
+        const ln      = document.getElementById('lastName').value.trim();
+        const em      = document.getElementById('email').value.trim();
+        const billing = document.querySelector('input[name="billingType"]:checked');
+        const tier    = document.querySelector('input[name="planTier"]:checked');
+        const sup     = document.querySelector('input[name="support"]:checked');
+        if (!fn || !ln || !em)  { alert('Please fill in your name and email.'); return false; }
+        if (!billing)           { alert('Please select your billing type (annual, lifetime, or split-pay).'); return false; }
+        if (!tier)              { alert('Please select your plan tier.'); return false; }
+        if (!sup)               { alert('Please let us know if you contacted support.'); return false; }
+      }
+      if (step === 1) {
+        const reason = document.getElementById('primaryReason').value;
+        const stay   = document.querySelector('input[name="stay"]:checked');
+        if (!reason) { alert('Please select a primary reason.'); return false; }
+        if (reason === 'difficult_to_use' && !document.querySelector('input[name="difficult_part"]:checked')) {
+          alert('Please tell us which part was difficult.'); return false;
+        }
+        if (reason === 'didnt_work' && !document.getElementById('featureExpectation').value.trim()) {
+          alert("Please specify which feature didn't meet expectations."); return false;
+        }
+        if (!stay) { alert("Please answer whether you'd consider staying."); return false; }
+        if (!document.getElementById('ratingValue').value) {
+          alert('Please rate your overall satisfaction.'); return false;
+        }
+      }
+      return true;
+    }
+
+    const stayReasonLabels = {
+      discount:           'a discount on your purchase',
+      switch_lifetime:    'switching to a lifetime license (no more renewals)',
+      switch_split_pay:   'switching to split-pay monthly instalments',
+      partial_credit:     'a partial credit or goodwill discount',
+      switch_annual:      'switching to annual billing',
+      payoff_discount:    'paying off your remaining balance at a discount',
+      downgrade:          'downgrading to a lower plan tier',
+      onboarding_help:    'one-on-one setup and onboarding help',
+      better_docs:        'a guided walkthrough of the feature',
+      extended_trial:     'more time to explore the product',
+      bug_fix:            'a fix or workaround for the issue you hit',
+      dedicated_support:  'direct support from our technical team',
+      feature_roadmap:    'a clear roadmap timeline for the feature you need',
+      workaround:         'a workaround or integration solution',
+      escalation:         'escalation to a senior team member',
+      demo_call:          'a personalised product demo',
+    };
+
+    function submitForm() {
+      if (!validateStep(1)) return;
+      document.getElementById('step1').classList.remove('active');
+      document.getElementById('progressBar').style.display = 'none';
+      document.querySelector('.card-header').style.display = 'none';
+      const email     = document.getElementById('email').value;
+      const stayVal   = document.querySelector('input[name="stay"]:checked')?.value;
+      const reasonEl  = document.querySelector('input[name="stay_reason"]:checked');
+      if (stayVal === 'yes') {
+        let label;
+        if (reasonEl) {
+          label = stayReasonLabels[reasonEl.value] || reasonEl.value.replace(/_/g, ' ');
+        } else {
+          const priceConcern = document.querySelector('input[name="price_bracket"]:checked')?.value;
+          const impliedPillLabels = {
+            unaware_lifetime:    'switching to a lifetime license',
+            unaware_splitpay:    'switching to split-pay instalments',
+            prefer_installments: 'switching to monthly instalments',
+            wrong_tier:          'downgrading to a lower tier',
+          };
+          label = impliedPillLabels[priceConcern] || 'a personalised offer';
+        }
+        document.getElementById('retentionOfferPill').textContent = '✦ You mentioned: ' + label;
+        document.getElementById('retentionEmail').textContent = email;
+        document.getElementById('retentionScreen').classList.add('active');
+      } else {
+        document.getElementById('confirmEmail').textContent = email;
+        document.getElementById('successScreen').classList.add('active');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
